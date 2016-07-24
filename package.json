@@ -1,14 +1,14 @@
 {
-  "name": "parse-server-simple-mailgun-adapter",
-  "version": "1.1.0",
-  "description": "Used to send Parse Server password reset and email verification emails though Mailgun",
+  "name": "parse-server-fp-simple-mailgun-adapter",
+  "version": "1.2.0",
+  "description": "Used to send Parse Server password reset and email verification emails through Mailgun",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ParsePlatform/parse-server-simple-mailgun-adapter.git"
+    "url": "git+https://github.com/floorprotector/parse-server-simple-mailgun-adapter.git"
   },
   "keywords": [
     "parse",
@@ -17,16 +17,18 @@
   ],
   "author": "Drew Gross",
   "contributors": [
-    "Eric Watson"
+    "Eric Watson",
+    "Floorprotector"
   ],
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/ParsePlatform/parse-server-simple-mailgun-adapter/issues"
+    "url": "https://github.com/floorprotector/parse-server-simple-mailgun-adapter/issues"
   },
-  "homepage": "https://github.com/ParsePlatform/parse-server-simple-mailgun-adapter#readme",
+  "homepage": "https://github.com/floorprotector/parse-server-simple-mailgun-adapter#readme",
   "dependencies": {
     "mailcomposer": "^3.10.0",
-    "mailgun-js": "^0.7.7"
+    "mailgun-js": "^0.7.7",
+    "request": "2.72.0"
   },
   "devDependencies": {
     "ejs": "^2.4.2",

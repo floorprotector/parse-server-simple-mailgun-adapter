@@ -1,5 +1,6 @@
 var mailcomposer = require('mailcomposer');
 var Mailgun = require('mailgun-js');
+var request = require('request');
 
 var SimpleMailgunAdapter = mailgunOptions => {
   var mailgun
@@ -16,6 +17,56 @@ var SimpleMailgunAdapter = mailgunOptions => {
     mailgun = Mailgun(mailgunOptions);
   }
 
+  var sendVerificationEmail = options => {
+	sendTemplateEmail(defaultVerificationEmail(options),options.verifyEmailTemplate,options);
+  }
+
+  var sendPasswordResetEmail = options => {
+  	sendTemplateEmail(defaultResetPasswordEmail(options),options.passwordResetEmailTemplate,options);
+  }
+  
+  var sendTemplateEmail = function(defaultEmail, template, options) {
+  	// get json Object from template url:
+  	var languageCode = options.user.get("emailLanguageCode");
+  	if (!(typeof languageCode === 'string' && languageCode.length == 2)) {
+	  	languageCode = "en";
+  	}
+  	var decodedURI = template + "?json=true&email=" + options.user.get("email") + "&appName=" + options.appName + "&link=" + options.link + "&languageCode=" + languageCode;
+  	var encodedURI = encodeURIComponent(decodedURI);
+  	
+	request(encodedURI, function (error, response, body) {
+		console.log(JSON.stringify(response));
+		var mail = defaultEmail;
+		if (!error && response.statusCode == 200) {
+			var mailFromTemplate = JSON.parse(response.responseText);
+			if (typeof mailFromTemplate.subject === 'string' && typeof mailFromTemplate.text === 'string' && (typeof mailFromTemplate.html === 'string' || !mailgunOptions.mime) && typeof mailFromTemplate.to === 'string') {
+			mail = mailFromTemplate;
+			}
+  		}
+		sendMail(mail);
+	});  	
+  };
+  
+  defaultVerificationEmail({link, user, appName, }) {
+    let text = "Hi,\n\n" +
+	      "You are being asked to confirm the e-mail address " + user.get("email") + " with " + appName + "\n\n" +
+	      "" +
+	      "Click here to confirm it:\n" + link;
+    let to = user.get("email");
+    let subject = 'Please verify your e-mail for ' + appName;
+    return { text, to, subject };
+  }
+
+  defaultResetPasswordEmail({link, user, appName, }) {
+    let text = "Hi,\n\n" +
+        "You requested to reset your password for " + appName + ".\n\n" +
+        "" +
+        "Click here to reset it:\n" + link;
+    let to = user.get("email");
+    let subject =  'Password Reset for ' + appName;
+    return { text, to, subject };
+  }
+
   var sendMail = mail => {
     if (mailgunOptions.mime === true) {
       return sendMime(mail);
@@ -23,7 +74,7 @@ var SimpleMailgunAdapter = mailgunOptions => {
       return sendPlain(mail);
     }
   }
-
+  
   var sendPlain = mail => {
     var data = {
       from: mailgunOptions.fromAddress,
@@ -74,31 +125,12 @@ var SimpleMailgunAdapter = mailgunOptions => {
       })
     })
   }
-
-  var exports = {
+  
+  return Object.freeze({
     sendMail: sendMail,
-
-    // The address from which to send emails
-    fromAddress: mailgunOptions.fromAddress,
-
-    // Send mode for this adapter. If true, send messages in MIME format
-    mime: mailgunOptions.mime || false
-  }
-
-  if (mailgunOptions.sendVerificationEmail) {
-    // TODO: Add templates for sendVerificationEmail
-    exports.sendVerificationEmail = mailgunOptions.sendVerificationEmail
-  }
-
-  if (mailgunOptions.sendPasswordResetEmail) {
-    if (!mailgunOptions.passwordResetTemplates || !mailgunOptions.passwordResetTemplates.text || !mailgunOptions.passwordResetTemplates.html) {
-      throw new Error('SimpleMailgunAdapter requires passwordResetTemplates for text and html if you supply sendPasswordResetEmail')
-    }
-    exports.passwordResetTemplates = mailgunOptions.passwordResetTemplates
-    exports.sendPasswordResetEmail = mailgunOptions.sendPasswordResetEmail
-  }
-
-  return Object.freeze(exports)
+    sendVerificationEmail: sendVerificationEmail,
+    sendPasswordResetEmail: sendPasswordResetEmail
+  });
 }
 
 module.exports = SimpleMailgunAdapter
