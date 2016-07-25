@@ -60,8 +60,10 @@ $html = <<<EOT
 EOT;
 
 if ($retJson == 'true') {
-	$htmlEncoded = json_encode($html);
-	$data = "{ \"subject\": \"$subject\",\"text\": \"$text\",\"html\": \"$htmlEncoded\",\"to\": \"$email\"}";
+	$data['subject'] = $subject;
+	$data['text'] = $text;
+	$data['html'] = $html;
+	$data['to'] = $email;
 	header('Content-Type: application/json; charset=utf-8');
 	echo json_encode($data);
 }

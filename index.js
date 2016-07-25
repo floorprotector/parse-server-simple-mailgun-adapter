@@ -18,11 +18,11 @@ var SimpleMailgunAdapter = mailgunOptions => {
   }
 
   var sendVerificationEmail = options => {
-	sendTemplateEmail(defaultVerificationEmail(options),options.verifyEmailTemplate,options);
+	sendTemplateEmail(defaultVerificationEmail(options),mailgunOptions.verifyEmailTemplate,options);
   }
 
   var sendPasswordResetEmail = options => {
-  	sendTemplateEmail(defaultResetPasswordEmail(options),options.passwordResetEmailTemplate,options);
+  	sendTemplateEmail(defaultResetPasswordEmail(options),mailgunOptions.passwordResetEmailTemplate,options);
   }
   
   var sendTemplateEmail = function(defaultEmail, template, options) {
@@ -31,14 +31,17 @@ var SimpleMailgunAdapter = mailgunOptions => {
   	if (!(typeof languageCode === 'string' && languageCode.length == 2)) {
 	  	languageCode = "en";
   	}
-  	var decodedURI = template + "?json=true&email=" + options.user.get("email") + "&appName=" + options.appName + "&link=" + options.link + "&languageCode=" + languageCode;
-  	var encodedURI = encodeURIComponent(decodedURI);
+  	var encodedURI = template + "?json=true&email=" + encodeURIComponent(options.user.get("email")) + "&appName=" + encodeURIComponent(options.appName) + "&link=" + encodeURIComponent(options.link) + "&languageCode=" + encodeURIComponent(languageCode);
   	
 	request(encodedURI, function (error, response, body) {
-		console.log(JSON.stringify(response));
 		var mail = defaultEmail;
 		if (!error && response.statusCode == 200) {
-			var mailFromTemplate = JSON.parse(response.responseText);
+			var mailFromTemplate;
+			try {
+				mailFromTemplate = JSON.parse(body);
+			}
+			catch (e) {
+			}
 			if (typeof mailFromTemplate.subject === 'string' && typeof mailFromTemplate.text === 'string' && (typeof mailFromTemplate.html === 'string' || !mailgunOptions.mime) && typeof mailFromTemplate.to === 'string') {
 			mail = mailFromTemplate;
 			}
@@ -47,28 +50,28 @@ var SimpleMailgunAdapter = mailgunOptions => {
 	});  	
   };
   
-  var defaultVerificationEmail = function({link, user, appName, }) {
-    let text = "Hi,\n\n" +
-	      "You are being asked to confirm the e-mail address " + user.get("email") + " with " + appName + "\n\n" +
+  var defaultVerificationEmail = function(options) {
+    var text = "Hi,\n\n" +
+	      "you are being asked to confirm the e-mail address " + options.user.get("email") + " with " + options.appName + "\n\n" +
 	      "" +
-	      "Click here to confirm it:\n" + link;
-    let to = user.get("email");
-    let subject = 'Please verify your e-mail for ' + appName;
+	      "Click here to confirm it:\n" + options.link;
+    var to = options.user.get("email");
+    var subject = 'Please verify your e-mail for ' + options.appName;
     return { text, to, subject };
   }
 
-  var defaultResetPasswordEmail = function({link, user, appName, }) {
-    let text = "Hi,\n\n" +
-        "You requested to reset your password for " + appName + ".\n\n" +
+  var defaultResetPasswordEmail = function(options) {
+    var text = "Hi,\n\n" +
+        "you requested to reset your password for " + options.appName + ".\n\n" +
         "" +
-        "Click here to reset it:\n" + link;
-    let to = user.get("email");
-    let subject =  'Password Reset for ' + appName;
+        "Click here to reset it:\n" + options.link;
+    var to = options.user.get("email");
+    var subject =  'Password Reset for ' + options.appName;
     return { text, to, subject };
   }
 
   var sendMail = mail => {
-    if (mailgunOptions.mime === true) {
+    if (mailgunOptions.mime == 'true') {
       return sendMime(mail);
     } else {
       return sendPlain(mail);
