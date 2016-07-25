@@ -47,7 +47,7 @@ var SimpleMailgunAdapter = mailgunOptions => {
 	});  	
   };
   
-  defaultVerificationEmail({link, user, appName, }) {
+  var defaultVerificationEmail = function({link, user, appName, }) {
     let text = "Hi,\n\n" +
 	      "You are being asked to confirm the e-mail address " + user.get("email") + " with " + appName + "\n\n" +
 	      "" +
@@ -57,7 +57,7 @@ var SimpleMailgunAdapter = mailgunOptions => {
     return { text, to, subject };
   }
 
-  defaultResetPasswordEmail({link, user, appName, }) {
+  var defaultResetPasswordEmail = function({link, user, appName, }) {
     let text = "Hi,\n\n" +
         "You requested to reset your password for " + appName + ".\n\n" +
         "" +

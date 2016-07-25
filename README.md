@@ -6,9 +6,9 @@ Used to send Parse Server password reset and email verification emails through M
 This adapter provides the use of html/text templates for parse-server verifyEmail and passwordResetEmail.
 
 These additional options are available:
-"mime" (true/false) - use mime or text type format
-"verifyEmailTemplate" - URL to your verifyEmail template (php)
-"passwordResetEmailTemplate"  - URL to your passwordResetEmail template (php)
+- "mime" (true/false) - use mime or text type format
+- "verifyEmailTemplate" - URL to your verifyEmail template (php)
+- "passwordResetEmailTemplate"  - URL to your passwordResetEmail template (php)
 
 This adapter is only required until the pull request is merged with the offical parse-server-simple-mailgun-adapter.
 
@@ -22,7 +22,7 @@ Add dependency to your parse-server package.json:
     "express": "~4.11.x",
     "kerberos": "~0.0.x",
     "parse": "~1.8.0",
-    "parse-server-fp-simple-mailgun-adapter": "~1.2.0",
+    "parse-server-fp-simple-mailgun-adapter": "~1.2.1",
     "parse-server": "~2.2.12"
   }
   ...
