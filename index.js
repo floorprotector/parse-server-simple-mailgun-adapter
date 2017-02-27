@@ -1,21 +1,17 @@
 var mailcomposer = require('mailcomposer');
-var Mailgun = require('mailgun-js');
+var AmazonSES = require('amazon-ses-mailer');
 var request = require('request');
 
 var SimpleMailgunAdapter = mailgunOptions => {
-  var mailgun
+  var mailgun;
   if (!mailgunOptions || !mailgunOptions.fromAddress) {
-    throw 'SimpleMailgunAdapter requires a fromAddress';
+    throw 'AmazonSESAdapter requires valid fromAddress.';
   }
 
-  if (typeof mailgunOptions.mailgun !== 'undefined') {
-    mailgun = mailgunOptions.mailgun;
-  } else {
-    if (!mailgunOptions || !mailgunOptions.apiKey || !mailgunOptions.domain) {
-      throw 'SimpleMailgunAdapter requires an API Key and domain.';
+	if (!mailgunOptions || !mailgunOptions.accessKeyId || !mailgunOptions.secretAccessKey || !mailgunOptions.region) {
+      throw 'AmazonSESAdapter requires valid accessKeyId, secretAccessKey, region.';
     }
-    mailgun = Mailgun(mailgunOptions);
-  }
+    mailgun = new AmazonSES(mailgunOptions.accessKeyId, mailgunOptions.secretAccessKey, mailgunOptions.region);
 
   var sendVerificationEmail = options => {
 	sendTemplateEmail(defaultVerificationEmail(options),mailgunOptions.verifyEmailTemplate,options);
@@ -83,11 +79,13 @@ var SimpleMailgunAdapter = mailgunOptions => {
       from: mailgunOptions.fromAddress,
       to: mail.to,
       subject: mail.subject,
-      text: mail.text,
+      body: {
+          text: mail.text
+      }
     }
 
     return new Promise((resolve, reject) => {
-      mailgun.messages().send(data, (err, body) => {
+      mailgun.send(data, (err, body) => {
         if (err != null) {
           reject(err);
         }
@@ -97,36 +95,25 @@ var SimpleMailgunAdapter = mailgunOptions => {
   }
 
   var sendMime = mail => {
-    var toAddress = mail.to
-    var composeData = {
+    var data = {
       from: mailgunOptions.fromAddress,
-      to: toAddress,
+      to: mail.to,
       subject: mail.subject,
-      text: mail.text,
-      html: mail.html
+      body: {
+          text: mail.text,
+          html: mail.html
+      }
     }
 
-    var mime = mailcomposer(composeData)
-
     return new Promise((resolve, reject) => {
-      mime.build((buildErr, message) => {
-        if (buildErr != null) {
+      mailgun.send(data, (err, body) => {
+        if (err != null) {
           reject(err);
-        } else {
-          var mimeData = {
-            to: toAddress,
-            message: message.toString('ascii')
-          }
-
-          mailgun.messages().sendMime(mimeData, (err, body) => {
-            if (typeof err !== 'undefined') {
-              reject(err);
-            }
-            resolve(body);
-          });
         }
-      })
-    })
+        resolve(body);
+      });
+    });
+
   }
   
   return Object.freeze({
