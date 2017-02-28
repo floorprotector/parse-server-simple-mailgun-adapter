@@ -21,7 +21,7 @@ Add dependency to your parse-server package.json:
     "express": "~4.11.x",
     "kerberos": "~0.0.x",
     "parse": "~1.8.0",
-    "parse-server-fp-simple-ses-adapter": "~2.0.1",
+    "parse-server-fp-simple-ses-adapter": "~2.0.2",
     "parse-server": "~2.2.12"
   }
   ...
