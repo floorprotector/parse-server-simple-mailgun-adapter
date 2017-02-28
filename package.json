@@ -26,8 +26,7 @@
   },
   "homepage": "https://github.com/floorprotector/parse-server-simple-mailgun-adapter#readme",
   "dependencies": {
-    "mailcomposer": "^3.10.0",
-    "amazon-ses-mailer": "^0.2.0",
+    "node-ses": "^2.0.3",
     "request": "2.72.0"
   },
   "devDependencies": {

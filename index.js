@@ -1,5 +1,4 @@
-var mailcomposer = require('mailcomposer');
-var AmazonSES = require('amazon-ses-mailer');
+var AmazonSES = require('node-ses');
 var request = require('request');
 
 var SimpleMailgunAdapter = mailgunOptions => {
@@ -11,7 +10,7 @@ var SimpleMailgunAdapter = mailgunOptions => {
 	if (!mailgunOptions || !mailgunOptions.accessKeyId || !mailgunOptions.secretAccessKey || !mailgunOptions.region) {
       throw 'AmazonSESAdapter requires valid accessKeyId, secretAccessKey, region.';
     }
-    mailgun = new AmazonSES(mailgunOptions.accessKeyId, mailgunOptions.secretAccessKey, mailgunOptions.region);
+    mailgun = AmazonSES.createClient({ key: mailgunOptions.accessKeyId, secret: mailgunOptions.secretAccessKey, amazon: "https://email." + mailgunOptions.region + ".amazonaws.com" });
 
   var sendVerificationEmail = options => {
 	sendTemplateEmail(defaultVerificationEmail(options),mailgunOptions.verifyEmailTemplate,options);
@@ -79,17 +78,18 @@ var SimpleMailgunAdapter = mailgunOptions => {
       from: mailgunOptions.fromAddress,
       to: mail.to,
       subject: mail.subject,
-      body: {
-          text: mail.text
-      }
+      message: mail.text,
+      altText: mail.text      
     }
-
+	if (process.env.VERBOSE) {
+		console.log("Sending plain email to: %s, subject: %s.",data.to,data.subject);
+    }
     return new Promise((resolve, reject) => {
-      mailgun.send(data, (err, body) => {
+      mailgun.sendEmail(data, (err, data, res) => {
         if (err != null) {
           reject(err);
         }
-        resolve(body);
+        resolve(data);
       });
     });
   }
@@ -99,18 +99,18 @@ var SimpleMailgunAdapter = mailgunOptions => {
       from: mailgunOptions.fromAddress,
       to: mail.to,
       subject: mail.subject,
-      body: {
-          text: mail.text,
-          html: mail.html
-      }
+      message: mail.html,
+      altText: mail.text      
     }
-
+	if (process.env.VERBOSE) {
+		console.log("Sending html email to: %s, subject: %s.",data.to,data.subject);
+    }
     return new Promise((resolve, reject) => {
-      mailgun.send(data, (err, body) => {
+      mailgun.sendEmail(data, (err, data, res) => {
         if (err != null) {
           reject(err);
         }
-        resolve(body);
+        resolve(data);
       });
     });
 
