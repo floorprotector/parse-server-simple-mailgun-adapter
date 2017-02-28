@@ -38,10 +38,12 @@ var api = new ParseServer({
     options: {
       // The address that your emails come from
       fromAddress: process.env.EMAIL_FROM_ADDRESS || 'no-reply@yourdomain.com',
-      // Your domain from mailgun.com
-      domain: process.env.EMAIL_DOMAIN || 'yourdomain.com',
-      // Your API key from mailgun.com
-      apiKey: process.env.EMAIL_API_KEY || '',
+      // Your accessKeyId from AWS SES:
+      accessKeyId: process.env.EMAIL_SES_ACCESS_KEY_ID || '',
+      // Your secretAccessKey from AWS SES:
+      secretAccessKey: process.env.EMAIL_SES_SECRET_ACCESS_KEY || '',
+      // Your region from AWS SES:
+      region: process.env.EMAIL_SES_REGION || 'eu-west-1',
       // Optional: activate mime type:
       mime: process.env.EMAIL_MIME || false,      
       // Optional: Your link to verifyEmail template (see folder templates for an example)
