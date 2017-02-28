@@ -1,6 +1,6 @@
 # parse-server-fp-simple-mailgun-adapter
 
-Used to send Parse Server password reset and email verification emails through Mailgun
+Used to send Parse Server password reset and email verification emails through AWS SES
 
 ## Use mime with templates
 This adapter provides the use of html/text templates for parse-server verifyEmail and passwordResetEmail.
@@ -10,7 +10,6 @@ These additional options are available:
 - "verifyEmailTemplate" - URL to your verifyEmail template (php)
 - "passwordResetEmailTemplate"  - URL to your passwordResetEmail template (php)
 
-This adapter is only required until the pull request is merged with the offical parse-server-simple-mailgun-adapter.
 
 ## Installation
 
@@ -22,7 +21,7 @@ Add dependency to your parse-server package.json:
     "express": "~4.11.x",
     "kerberos": "~0.0.x",
     "parse": "~1.8.0",
-    "parse-server-fp-simple-mailgun-adapter": "~1.2.2",
+    "parse-server-fp-simple-ses-adapter": "~2.0.1",
     "parse-server": "~2.2.12"
   }
   ...
@@ -35,7 +34,7 @@ var emailTemplatesUrl = process.env.EMAIL_TEMPLATES_URL || 'http://yourdomain.co
 var api = new ParseServer({
   ...
   emailAdapter: {
-    module: 'parse-server-fp-simple-mailgun-adapter',
+    module: 'parse-server-fp-simple-ses-adapter',
     options: {
       // The address that your emails come from
       fromAddress: process.env.EMAIL_FROM_ADDRESS || 'no-reply@yourdomain.com',
